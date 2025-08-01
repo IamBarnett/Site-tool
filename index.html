@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navegación Interactiva del Site - Corporate Campus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0078d4 0%, #106ebe 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 100vw;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0078d4 0%, #106ebe 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .search-container {
+            position: relative;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.8rem 2.5rem 0.8rem 1rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.95);
+        }
+
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transform: translateY(-1px);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #0078d4;
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            background: #106ebe;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.6);
+            transform: translateY(-1px);
+        }
+
+        .main-content {
+            display: flex;
+            height: calc(100vh - 140px);
+        }
+
+        .sidebar {
+            width: 350px;
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .toggle-sidebar {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #0078d4;
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        .floor-tabs {
+            display: flex;
+            background: #e9ecef;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .floor-tab {
+            flex: 1;
+            padding: 1rem;
+            background: #e9ecef;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .floor-tab.active {
+            background: white;
+            color: #0078d4;
+            border-bottom: 3px solid #0078d4;
+        }
+
+        .floor-tab:hover {
+            background: #f8f9fa;
+        }
+
+        .locations-list {
+            padding: 1rem;
+        }
+
+        .location-category {
+            margin-bottom: 1.5rem;
+        }
+
+        .category-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .location-item {
+            padding: 0.75rem;
+            margin: 0.25rem 0;
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .location-item:hover {
+            border-color: #0078d4;
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(0,120,212,0.15);
+        }
+
+        .location-item.selected {
+            background: linear-gradient(135deg, #0078d4, #106ebe);
+            color: white;
+            border-color: #0078d4;
+        }
+
+        .location-info {
+            flex: 1;
+        }
+
+        .location-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .location-details {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .location-item.selected .location-details {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 8px;
+        }
+
+        .status-available { background: #28a745; }
+        .status-busy { background: #dc3545; }
+        .status-soon { background: #ffc107; }
+
+        .map-container {
+            flex: 1;
+            position: relative;
+            background: #f8f9fa;
+            overflow: hidden;
+        }
+
+        .map-canvas {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            cursor: grab;
+            background: white;
+            background-image: 
+                radial-gradient(circle, #e9ecef 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .map-canvas:active {
+            cursor: grabbing;
+        }
+
+        .floor-plan {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        .building-section {
+            position: relative;
+            margin: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            background: #fff;
+            min-height: 200px;
+        }
+
+        .building-label {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: #0078d4;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 8px rgba(0,120,212,0.3);
+        }
+
+        .room-marker {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .room-marker:hover {
+            transform: scale(1.2);
+            z-index: 10;
+        }
+
+        .room-meeting { background: #28a745; color: white; }
+        .room-cafeteria { background: #fd7e14; color: white; }
+        .room-work { background: #6f42c1; color: white; }
+        .room-common { background: #20c997; color: white; }
+        .room-emergency { background: #dc3545; color: white; }
+
+        .room-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .room-marker:hover .room-tooltip {
+            opacity: 1;
+        }
+
+        .map-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .map-control-btn {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #495057;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .map-control-btn:hover {
+            background: #0078d4;
+            color: white;
+            border-color: #0078d4;
+            transform: scale(1.1);
+        }
+
+        .info-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            max-width: 300px;
+            display: none;
+        }
+
+        .info-panel.active {
+            display: block;
+            animation: slideInLeft 0.3s ease;
+        }
+
+        @keyframes slideInLeft {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .info-panel h3 {
+            color: #0078d4;
+            margin-bottom: 0.5rem;
+        }
+
+        .route-path {
+            position: absolute;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .route-line {
+            stroke: #0078d4;
+            stroke-width: 3;
+            fill: none;
+            stroke-dasharray: 10,5;
+            animation: dash 2s linear infinite;
+        }
+
+        @keyframes dash {
+            to { stroke-dashoffset: -15; }
+        }
+
+        .legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            font-size: 0.85rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0.25rem 0;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                z-index: 999;
+                height: 100%;
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                height: calc(100vh - 180px);
+            }
+            
+            .header-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-container {
+                min-width: unset;
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>
+                🏢 Navegación Interactiva del Campus
+                <span style="font-size: 0.6em; opacity: 0.8;">v2.0</span>
+            </h1>
+            <div class="header-controls">
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Buscar salas de reuniones, cafeterías, areas..." id="searchInput">
+                    <button class="search-btn" onclick="performSearch()">🔍</button>
+                </div>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">Todo</button>
+                    <button class="filter-btn" data-filter="meeting">Salas Reunión</button>
+                    <button class="filter-btn" data-filter="cafeteria">Cafeterías</button>
+                    <button class="filter-btn" data-filter="common">Áreas Comunes</button>
+                    <button class="filter-btn" data-filter="emergency">Emergencia</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <aside class="sidebar" id="sidebar">
+                <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+                
+                <div class="floor-tabs">
+                    <button class="floor-tab active" data-floor="ground">Planta Baja</button>
+                    <button class="floor-tab" data-floor="second">Segundo Piso</button>
+                </div>
+
+                <div class="locations-list" id="locationsList">
+                    <div class="location-category">
+                        <div class="category-header">
+                            🏢 Edificios Principales
+                        </div>
+                        <div class="location-item" data-location="building-a" onclick="selectLocation(this)">
+                            <div class="location-info">
+                                <div class="location-name">Building A</div>
+                                <div class="location-details">Área principal de oficinas</div>
+                            </div>
+                        </div>
+                        <div class="location-item" data-location="building-b" onclick="selectLocation(this)">
+                            <div class="location-info">
+                                <div class="location-name">Building B</div>
+                                <div class="location-details">Operaciones y desarrollo</div>
+                            </div>
+                        </div>
+                        <div class="location-item" data-location="building-c" onclick="selectLocation(this)">
+                            <div class="location-info">
+                                <div class="location-name">Building C</div>
+                                <div class="location-details">Administración</div>
+                            </div>
+                        </div>
+                        <div class="location-item" data-location="building-d" onclick="selectLocation(this)">
+                            <div class="location-info">
+                                <div class="location-name">Building D</div>
+                                <div class="location-details">Servicios generales</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="location-category">
+                        <div class="category-header">
+                            🤝 Salas de Reuniones
+                        </div>
+                        <div class="location-item" data-location="team-room-34" onclick="selectLocation(this)">
+                            <div class="location-info">
+                                <div class="location-name">Team Room 34</div>
+                                <div class="location-details">Cap: 8 personas • Proyector</div>
+                            </div>
+                            <div class="status-indicator status-available"></div>
+                        </div>
+                        <div class="location-item" data-location="team-room-35" onclick="selectLocation(this)">
+                            <div class="location-info">
+                                <div class="location-name">Team Room 35</div>
+                                <div class="location-details">Cap: 6 personas • TV</div>
+                            </div>
+                            <div class="status-indicator status-busy"></div>
+                        </div>
+                        <div class="location-item" data-location="team-room-36" onclick="selectLocation(this)">
+                            <div class="location-info">
+                                <div class="location-name">Team Room 36</div>
+                                <div class="location-details">Cap: 10 personas • Pizarra</div>
+                            </div>
+                            <div class="status-indicator status-soon"></div>
+                        </div>
+                        <div class="location-item" data-location="team-room-39" onclick="selectLocation(this)">
+                            <div class="location-info">
+                                <div class="location-name">Team Room 39</div>
+                                <div class="location-details">Cap: 12 personas • Sistema AV</div>
+                            </div>
+                            <div class="status-indicator status-available"></div>
+                        </div>
+                    </div>
+
+                    <div class="location-category">
+                        <div class="category-header">
+                            🍽️ Áreas de Alimentación
+                        </div>
+                        <div class="location-item" data-location="cafeteria" onclick="selectLocation(this)">
+                            <div class="location-info">
+                                <div class="location-name">Cafetería Principal</div>
+                                <div class="location-details">Horario: 7:00 AM - 6:00 PM</div>
+                            </div>
+                        </div>
+                        <div class="location-item" data-location="comedor" onclick="selectLocation(this)">
+                            <div class="location-info">
+                                <div class="location-name">Comedor</div>
+                                <div class="location-details">Área de almuerzo grupal</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="location-category">
+                        <div class="category-header">
+                            🏢 Áreas Especiales
+                        </div>
+                        <div class="location-item" data-location="boeing-space" onclick="selectLocation(this)">
+                            <div class="location-info">
+                                <div class="location-name">Boeing Space</div>
+                                <div class="location-details">Área de desarrollo técnico</div>
+                            </div>
+                        </div>
+                        <div class="location-item" data-location="salon-pedasi" onclick="selectLocation(this)">
+                            <div class="location-info">
+                                <div class="location-name">Salón Pedasí</div>
+                                <div class="location-details">Eventos y conferencias</div>
+                            </div>
+                        </div>
+                        <div class="location-item" data-location="arraiján" onclick="selectLocation(this)">
+                            <div class="location-info">
+                                <div class="location-name">Área Arraiján</div>
+                                <div class="location-details">Oficinas regionales</div>
+                            </div>
+                        </div>
+                        <div class="location-item" data-location="chorrera" onclick="selectLocation(this)">
+                            <div class="location-info">
+                                <div class="location-name">Área Chorrera</div>
+                                <div class="location-details">Servicios administrativos</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="map-container">
+                <div class="map-canvas" id="mapCanvas">
+                    <div class="floor-plan" id="floorPlan">
+                        <!-- Building A -->
+                        <div class="building-section" style="width: 400px; height: 300px; position: relative;">
+                            <div class="building-label">BUILDING A</div>
+                            <div class="room-marker room-work" style="top: 50px; left: 50px;" data-room="work-area-a1">
+                                WA
+                                <div class="room-tooltip">Área de Trabajo A1</div>
+                            </div>
+                            <div class="room-marker room-meeting" style="top: 80px; left: 200px;" data-room="meeting-a1">
+                                M1
+                                <div class="room-tooltip">Sala de Reunión A1</div>
+                            </div>
+                            <div class="room-marker room-common" style="top: 150px; left: 300px;" data-room="common-a1">
+                                C1
+                                <div class="room-tooltip">Área Común A1</div>
+                            </div>
+                        </div>
+
+                        <!-- Building B -->
+                        <div class="building-section" style="width: 350px; height: 280px; position: relative; margin-left: 420px; margin-top: -300px;">
+                            <div class="building-label">BUILDING B</div>
+                            <div class="room-marker room-work" style="top: 60px; left: 80px;" data-room="work-area-b1">
+                                WB
+                                <div class="room-tooltip">Área de Trabajo B1</div>
+                            </div>
+                            <div class="room-marker room-meeting" style="top: 120px; left: 180px;" data-room="meeting-b1">
+                                M2
+                                <div class="room-tooltip">Sala de Reunión B1</div>
+                            </div>
+                        </div>
+
+                        <!-- Building C -->
+                        <div class="building-section" style="width: 300px; height: 250px; position: relative; margin-top: 20px;">
+                            <div class="building-label">BUILDING C</div>
+                            <div class="room-marker room-work" style="top: 70px; left: 60px;" data-room="work-area-c1">
+                                WC
+                                <div class="room-tooltip">Área de Trabajo C1</div>
+                            </div>
+                            <div class="room-marker room-cafeteria" style="top: 150px; left: 200px;" data-room="cafeteria">
+                                CF
+                                <div class="room-tooltip">Cafetería Principal</div>
+                            </div>
+                        </div>
+
+                        <!-- Building D -->
+                        <div class="building-section" style="width: 450px; height: 350px; position: relative; margin-left: 320px; margin-top: -250px;">
+                            <div class="building-label">BUILDING D</div>
+                            <div class="room-marker room-meeting" style="top: 80px; left: 100px;" data-room="team-room-34">
+                                T34
+                                <div class="room-tooltip">Team Room 34 • Disponible</div>
+                            </div>
+                            <div class="room-marker room-meeting" style="top: 120px; left: 200px;" data-room="team-room-35">
+                                T35
+                                <div class="room-tooltip">Team Room 35 • Ocupado</div>
+                            </div>
+                            <div class="room-marker room-meeting" style="top: 160px; left: 300px;" data-room="team-room-36">
+                                T36
+                                <div class="room-tooltip">Team Room 36 • Pronto Libre</div>
+                            </div>
+                            <div class="room-marker room-meeting" style="top: 280px; left: 350px;" data-room="team-room-39">
+                                T39
+                                <div class="room-tooltip">Team Room 39 • Disponible</div>
+                            </div>
+                            <div class="room-marker room-work" style="top: 200px; left: 150px;" data-room="boeing-space">
+                                BS
+                                <div class="room-tooltip">Boeing Space</div>
+                            </div>
+                            <div class="room-marker room-cafeteria" style="top: 50px; left: 300px;" data-room="comedor">
+                                CD
+                                <div class="room-tooltip">Comedor</div>
+                            </div>
+                            <div class="room-marker room-common" style="top: 250px; left: 50px;" data-room="salon-pedasi">
+                                SP
+                                <div class="room-tooltip">Salón Pedasí</div>
+                            </div>
+                            <div class="room-marker room-emergency" style="top: 30px; left: 50px;" data-room="emergency-exit">
+                                E1
+                                <div class="room-tooltip">Salida de Emergencia</div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Areas -->
+                        <div class="building-section" style="width: 200px; height: 180px; position: relative; margin-top: 30px;">
+                            <div class="building-label">SERVICIOS</div>
+                            <div class="room-marker room-common" style="top: 60px; left: 80px;" data-room="arraiján">
+                                AR
+                                <div class="room-tooltip">Área Arraiján</div>
+                            </div>
+                            <div class="room-marker room-common" style="top: 120px; left: 120px;" data-room="chorrera">
+                                CH
+                                <div class="room-tooltip">Área Chorrera</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <svg class="route-path" id="routePath" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                        <!-- Las rutas se dibujarán aquí dinámicamente -->
+                    </svg>
+                </div>
+
+                <div class="map-controls">
+                    <button class="map-control-btn" onclick="zoomIn()" title="Acercar">+</button>
+                    <button class="map-control-btn" onclick="zoomOut()" title="Alejar">-</button>
+                    <button class="map-control-btn" onclick="resetZoom()" title="Restablecer">⌂</button>
+                    <button class="map-control-btn" onclick="showMyLocation()" title="Mi Ubicación">📍</button>
+                </div>
+
+                <div class="legend">
+                    <div style="font-weight: 600; margin-bottom: 0.5rem;">Leyenda</div>
+                    <div class="legend-item">
+                        <div class="legend-color room-meeting"></div>
+                        <span>Salas de Reunión</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color room-cafeteria"></div>
+                        <span>Cafeterías</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color room-work"></div>
+                        <span>Áreas de Trabajo</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color room-common"></div>
+                        <span>Áreas Comunes</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color room-emergency"></div>
+                        <span>Emergencia</span>
+                    </div>
+                </div>
+
+                <div class="info-panel" id="infoPanel">
+                    <h3 id="infoPanelTitle">Información del Lugar</h3>
+                    <div id="infoPanelContent">
+                        Selecciona un lugar del mapa para ver más información.
+                    </div>
+                    <button onclick="closeInfoPanel()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #0078d4; color: white; border: none; border-radius: 4px; cursor: pointer;">Cerrar</button>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        let currentZoom = 1;
+        let isDragging = false;
+        let startX, startY, currentX = 0, currentY = 0;
+        let selectedLocation = null;
+
+        // Datos de ubicaciones
+        const locationData = {
+            'team-room-34': {
+                name: 'Team Room 34',
+                capacity: 8,
+                equipment: ['Proyector', 'Pizarra Digital', 'Sistema de Audio'],
+                status: 'available',
+                floor: 'ground',
+                building: 'D',
+                description: 'Sala de reuniones equipada con tecnología de última generación para presentaciones y videoconferencias.'
+            },
+            'team-room-35': {
+                name: 'Team Room 35',
+                capacity: 6,
+                equipment: ['TV 55"', 'Sistema de Videoconferencia'],
+                status: 'busy',
+                floor: 'ground',
+                building: 'D',
+                description: 'Sala íntima perfecta para reuniones de equipo pequeño.'
+            },
+            'team-room-36': {
+                name: 'Team Room 36',
+                capacity: 10,
+                equipment: ['Pizarra', 'Sistema de Audio', 'Mesa de Conferencia'],
+                status: 'soon',
+                floor: 'ground',
+                building: 'D',
+                description: 'Sala amplia ideal para reuniones de departamento y workshops.'
+            },
+            'team-room-39': {
+                name: 'Team Room 39',
+                capacity: 12,
+                equipment: ['Sistema AV Completo', 'Cámara 360°', 'Micrófono Omnidireccional'],
+                status: 'available',
+                floor: 'ground',
+                building: 'D',
+                description: 'Sala principal para grandes reuniones y eventos corporativos.'
+            },
+            'cafeteria': {
+                name: 'Cafetería Principal',
+                capacity: 100,
+                equipment: ['Microondas', 'Refrigeradores', 'Máquinas de Café'],
+                status: 'open',
+                floor: 'ground',
+                building: 'C',
+                description: 'Espacio de alimentación principal con variedad de opciones. Horario: 7:00 AM - 6:00 PM'
+            },
+            'comedor': {
+                name: 'Comedor',
+                capacity: 80,
+                equipment: ['Mesas Comunales', 'TV', 'Área de Juegos'],
+                status: 'open',
+                floor: 'ground',
+                building: 'D',
+                description: 'Área social para almorzar y socializar con compañeros de trabajo.'
+            },
+            'boeing-space': {
+                name: 'Boeing Space',
+                capacity: 200,
+                equipment: ['Estaciones de Trabajo Especializadas', 'Simuladores', 'Servidores'],
+                status: 'restricted',
+                floor: 'ground',
+                building: 'D',
+                description: 'Área de desarrollo técnico especializada para proyectos Boeing.'
+            },
+            'salon-pedasi': {
+                name: 'Salón Pedasí',
+                capacity: 150,
+                equipment: ['Escenario', 'Sistema de Sonido Profesional', 'Iluminación LED'],
+                status: 'available',
+                floor: 'ground',
+                building: 'D',
+                description: 'Auditorio principal para eventos, conferencias y presentaciones corporativas.'
+            },
+            'arraiján': {
+                name: 'Área Arraiján',
+                capacity: 50,
+                equipment: ['Oficinas Privadas', 'Sala de Juntas', 'Recepción'],
+                status: 'open',
+                floor: 'ground',
+                building: 'Services',
+                description: 'Oficinas regionales para atención al cliente y operaciones locales.'
+            },
+            'chorrera': {
+                name: 'Área Chorrera',
+                capacity: 40,
+                equipment: ['Escritorios', 'Archivos', 'Impresoras'],
+                status: 'open',
+                floor: 'ground',
+                building: 'Services',
+                description: 'Servicios administrativos y procesamiento de documentos.'
+            }
+        };
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            setupMapInteraction();
+            updateAvailabilityStatus();
+            // Actualizar estado cada 30 segundos
+            setInterval(updateAvailabilityStatus, 30000);
+        });
+
+        function setupEventListeners() {
+            // Filtros
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    filterLocations(this.dataset.filter);
+                });
+            });
+
+            // Tabs de piso
+            document.querySelectorAll('.floor-tab').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.floor-tab').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    switchFloor(this.dataset.floor);
+                });
+            });
+
+            // Búsqueda en tiempo real
+            document.getElementById('searchInput').addEventListener('input', function() {
+                performLiveSearch(this.value);
+            });
+
+            // Marcadores de habitaciones
+            document.querySelectorAll('.room-marker').forEach(marker => {
+                marker.addEventListener('click', function() {
+                    showRoomInfo(this.dataset.room);
+                });
+            });
+        }
+
+        function setupMapInteraction() {
+            const mapCanvas = document.getElementById('mapCanvas');
+            const floorPlan = document.getElementById('floorPlan');
+
+            // Zoom con rueda del ratón
+            mapCanvas.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? -0.1 : 0.1;
+                currentZoom = Math.max(0.5, Math.min(3, currentZoom + delta));
+                updateMapTransform();
+            });
+
+            // Arrastrar mapa
+            mapCanvas.addEventListener('mousedown', startDrag);
+            mapCanvas.addEventListener('mousemove', drag);
+            mapCanvas.addEventListener('mouseup', endDrag);
+            mapCanvas.addEventListener('mouseleave', endDrag);
+
+            // Touch events para móvil
+            mapCanvas.addEventListener('touchstart', handleTouch);
+            mapCanvas.addEventListener('touchmove', handleTouch);
+            mapCanvas.addEventListener('touchend', endDrag);
+        }
+
+        function startDrag(e) {
+            isDragging = true;
+            startX = e.clientX - currentX;
+            startY = e.clientY - currentY;
+            document.getElementById('mapCanvas').style.cursor = 'grabbing';
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            currentX = e.clientX - startX;
+            currentY = e.clientY - startY;
+            updateMapTransform();
+        }
+
+        function endDrag() {
+            isDragging = false;
+            document.getElementById('mapCanvas').style.cursor = 'grab';
+        }
+
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            if (e.type === 'touchstart') {
+                startDrag({clientX: touch.clientX, clientY: touch.clientY});
+            } else if (e.type === 'touchmove') {
+                drag({clientX: touch.clientX, clientY: touch.clientY, preventDefault: () => {}});
+            }
+        }
+
+        function updateMapTransform() {
+            const floorPlan = document.getElementById('floorPlan');
+            floorPlan.style.transform = `translate(calc(-50% + ${currentX}px), calc(-50% + ${currentY}px)) scale(${currentZoom})`;
+        }
+
+        function zoomIn() {
+            currentZoom = Math.min(3, currentZoom + 0.2);
+            updateMapTransform();
+        }
+
+        function zoomOut() {
+            currentZoom = Math.max(0.5, currentZoom - 0.2);
+            updateMapTransform();
+        }
+
+        function resetZoom() {
+            currentZoom = 1;
+            currentX = 0;
+            currentY = 0;
+            updateMapTransform();
+        }
+
+        function showMyLocation() {
+            // Simular ubicación actual
+            const myLocationMarker = document.createElement('div');
+            myLocationMarker.className = 'room-marker';
+            myLocationMarker.style.cssText = 'background: #ff4757; animation: pulse 2s infinite; top: 100px; left: 100px; z-index: 100;';
+            myLocationMarker.innerHTML = '📍<div class="room-tooltip">Tu ubicación actual</div>';
+            
+            document.getElementById('floorPlan').appendChild(myLocationMarker);
+            
+            // Centrar en mi ubicación
+            currentX = -100;
+            currentY = -100;
+            currentZoom = 1.5;
+            updateMapTransform();
+            
+            // Remover después de 5 segundos
+            setTimeout(() => {
+                myLocationMarker.remove();
+            }, 5000);
+            
+            showNotification('📍 Ubicación actual mostrada', 'success');
+        }
+
+        function selectLocation(element) {
+            // Remover selección anterior
+            document.querySelectorAll('.location-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // Seleccionar nuevo elemento
+            element.classList.add('selected');
+            
+            const locationId = element.dataset.location;
+            selectedLocation = locationId;
+            
+            // Mostrar información
+            showLocationInfo(locationId);
+            
+            // Centrar en el mapa
+            centerMapOnLocation(locationId);
+            
+            // Resaltar en el mapa
+            highlightLocationOnMap(locationId);
+        }
+
+        function showLocationInfo(locationId) {
+            const data = locationData[locationId];
+            if (!data) return;
+
+            const infoPanel = document.getElementById('infoPanel');
+            const title = document.getElementById('infoPanelTitle');
+            const content = document.getElementById('infoPanelContent');
+
+            title.textContent = data.name;
+            
+            let statusText = '';
+            switch(data.status) {
+                case 'available': statusText = '✅ Disponible'; break;
+                case 'busy': statusText = '🔴 Ocupado'; break;
+                case 'soon': statusText = '🟡 Libre pronto'; break;
+                case 'open': statusText = '🟢 Abierto'; break;
+                case 'restricted': statusText = '🔒 Acceso restringido'; break;
+            }
+
+            content.innerHTML = `
+                <div style="margin-bottom: 1rem;">
+                    <strong>Estado:</strong> ${statusText}
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <strong>Edificio:</strong> ${data.building} • <strong>Capacidad:</strong> ${data.capacity} personas
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <strong>Equipamiento:</strong><br>
+                    ${data.equipment.map(eq => `• ${eq}`).join('<br>')}
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    ${data.description}
+                </div>
+                ${data.status === 'available' ? 
+                    '<button onclick="reserveRoom(\'' + locationId + '\')" style="width: 100%; padding: 0.75rem; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 0.5rem;">📅 Reservar Ahora</button>' : 
+                    ''
+                }
+                <button onclick="getDirections(\'' + locationId + '\')" style="width: 100%; padding: 0.75rem; background: #0078d4; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 0.5rem;">🧭 Cómo llegar</button>
+            `;
+
+            infoPanel.classList.add('active');
+        }
+
+        function centerMapOnLocation(locationId) {
+            const marker = document.querySelector(`[data-room="${locationId}"]`);
+            if (marker) {
+                const rect = marker.getBoundingClientRect();
+                const containerRect = document.getElementById('mapCanvas').getBoundingClientRect();
+                
+                currentX = containerRect.width / 2 - rect.left - rect.width / 2;
+                currentY = containerRect.height / 2 - rect.top - rect.height / 2;
+                currentZoom = 1.5;
+                
+                updateMapTransform();
+            }
+        }
+
+        function highlightLocationOnMap(locationId) {
+            // Remover highlights anteriores
+            document.querySelectorAll('.room-marker').forEach(marker => {
+                marker.classList.remove('pulse');
+            });
+            
+            // Agregar highlight al marcador seleccionado
+            const marker = document.querySelector(`[data-room="${locationId}"]`);
+            if (marker) {
+                marker.classList.add('pulse');
+                setTimeout(() => marker.classList.remove('pulse'), 3000);
+            }
+        }
+
+        function performSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            performLiveSearch(query);
+        }
+
+        function performLiveSearch(query) {
+            if (!query) {
+                // Mostrar todos los elementos
+                document.querySelectorAll('.location-item').forEach(item => {
+                    item.style.display = 'flex';
+                });
+                return;
+            }
+
+            document.querySelectorAll('.location-item').forEach(item => {
+                const locationId = item.dataset.location;
+                const data = locationData[locationId];
+                const text = item.textContent.toLowerCase();
+                
+                if (text.includes(query) || (data && data.name.toLowerCase().includes(query))) {
+                    item.style.display = 'flex';
+                    // Resaltar coincidencias
+                    item.style.background = 'linear-gradient(135deg, #fff3cd, #ffeaa7)';
+                    setTimeout(() => {
+                        item.style.background = 'white';
+                    }, 2000);
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        function filterLocations(filter) {
+            const categoryMap = {
+                'meeting': ['team-room-34', 'team-room-35', 'team-room-36', 'team-room-39'],
+                'cafeteria': ['cafeteria', 'comedor'],
+                'common': ['salon-pedasi', 'arraiján', 'chorrera'],
+                'emergency': ['emergency-exit'],
+                'work': ['boeing-space']
+            };
+
+            document.querySelectorAll('.location-item').forEach(item => {
+                const locationId = item.dataset.location;
+                
+                if (filter === 'all') {
+                    item.style.display = 'flex';
+                } else {
+                    const shouldShow = categoryMap[filter] && categoryMap[filter].includes(locationId);
+                    item.style.display = shouldShow ? 'flex' : 'none';
+                }
+            });
+
+            // Filtrar marcadores en el mapa
+            document.querySelectorAll('.room-marker').forEach(marker => {
+                const roomId = marker.dataset.room;
+                
+                if (filter === 'all') {
+                    marker.style.display = 'flex';
+                } else {
+                    const shouldShow = categoryMap[filter] && categoryMap[filter].includes(roomId);
+                    marker.style.display = shouldShow ? 'flex' : 'none';
+                }
+            });
+        }
+
+        function switchFloor(floor) {
+            // En este ejemplo, mostramos el mismo plano
+            // En implementación real, cargarías diferentes planos
+            showNotification(`📍 Cambiado a: ${floor === 'ground' ? 'Planta Baja' : 'Segundo Piso'}`, 'info');
+        }
+
+        function updateAvailabilityStatus() {
+            // Simulación de actualización de disponibilidad en tiempo real
+            const statusElements = document.querySelectorAll('.status-indicator');
+            statusElements.forEach(indicator => {
+                // Simular cambios aleatorios de estado
+                if (Math.random() < 0.1) { // 10% probabilidad de cambio
+                    const statuses = ['status-available', 'status-busy', 'status-soon'];
+                    const currentClasses = Array.from(indicator.classList);
+                    const currentStatus = currentClasses.find(cls => cls.startsWith('status-'));
+                    
+                    indicator.classList.remove(currentStatus);
+                    const newStatus = statuses[Math.floor(Math.random() * statuses.length)];
+                    indicator.classList.add(newStatus);
+                }
+            });
+        }
+
+        function reserveRoom(locationId) {
+            const data = locationData[locationId];
+            if (data && data.status === 'available') {
+                // Integración con Microsoft Graph API (simulado)
+                showNotification(`✅ ${data.name} reservada exitosamente para la próxima hora`, 'success');
+                
+                // Actualizar estado
+                const statusIndicator = document.querySelector(`[data-location="${locationId}"] .status-indicator`);
+                if (statusIndicator) {
+                    statusIndicator.classList.remove('status-available');
+                    statusIndicator.classList.add('status-busy');
+                }
+                
+                // Simular actualización en locationData
+                locationData[locationId].status = 'busy';
+                
+                closeInfoPanel();
+            }
+        }
+
+        function getDirections(locationId) {
+            const data = locationData[locationId];
+            if (!data) return;
+
+            // Mostrar ruta animada
+            showRoute(locationId);
+            
+            showNotification(`🧭 Mostrando ruta hacia ${data.name}`, 'info');
+            closeInfoPanel();
+        }
+
+        function showRoute(destinationId) {
+            const routePath = document.getElementById('routePath');
+            
+            // Limpiar rutas anteriores
+            routePath.innerHTML = '';
+            
+            // Crear ruta animada (simulada)
+            const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            pathElement.setAttribute('class', 'route-line');
+            pathElement.setAttribute('d', 'M 100 100 Q 200 50 400 200 T 600 300');
+            
+            routePath.appendChild(pathElement);
+            
+            // Remover ruta después de 10 segundos
+            setTimeout(() => {
+                routePath.innerHTML = '';
+            }, 10000);
+        }
+
+        function showRoomInfo(roomId) {
+            showLocationInfo(roomId);
+        }
+
+        function closeInfoPanel() {
+            document.getElementById('infoPanel').classList.remove('active');
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+            
+            // En móvil, toggle active class
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('active');
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            // Crear notificación
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                animation: slideInRight 0.3s ease;
+                max-width: 300px;
+                font-weight: 500;
+            `;
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Remover después de 4 segundos
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
+
+        // Agregar estilos de animación para notificaciones
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Responsive handling
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                document.getElementById('sidebar').classList.remove('active');
+            }
+        });
+
+        // Integración simulada con SharePoint y Microsoft Graph
+        function integrateWithSharePoint() {
+            // Esta función simula la integración con SharePoint
+            console.log('Integración con SharePoint iniciada...');
+            
+            // Verificar disponibilidad de salas en tiempo real
+            fetchRoomAvailability();
+            
+            // Sincronizar con calendario de Outlook
+            syncWithOutlook();
+        }
+
+        function fetchRoomAvailability() {
+            // Simulación de llamada a Microsoft Graph API
+            console.log('Obteniendo disponibilidad de salas...');
+            
+            // En implementación real, esto haría una llamada AJAX a Microsoft Graph
+            // para obtener la disponibilidad real de las salas
+        }
+
+        function syncWithOutlook() {
+            // Simulación de sincronización con Outlook
+            console.log('Sincronizando con Outlook Calendar...');
+            
+            // En implementación real, esto se conectaría con el API de Outlook
+            // para mostrar reuniones próximas y permitir reservas
+        }
+
+        // Inicializar integración (simulada)
+        setTimeout(integrateWithSharePoint, 1000);
+    </script>
+</body>
+</html>
